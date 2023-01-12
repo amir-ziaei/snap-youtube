@@ -2,7 +2,7 @@ const { spawn } = require('child_process')
 const fs = require('fs')
 const ytdl = require('youtube-dl-exec')
 
-async function init() {
+;(async function init() {
   const ytUrl = process.argv[2]
   if (!ytUrl) {
     console.log('Please provide a YouTube URL')
@@ -24,15 +24,13 @@ async function init() {
     videoName: output,
     outputDir: `./output/${ytId}/frames/`,
   })
-}
-init()
+})()
 
 function convertVideoToFrames({ videoName, outputDir }) {
   const options = {
     videoName,
     outputDir,
     imgFileName: 'img',
-    // fps: 1,
     startTime: 0,
     duration: 0,
   }
@@ -48,7 +46,6 @@ function convertVideoToFrames({ videoName, outputDir }) {
     'image2',
     '-vf',
     `setpts=1.0*PTS, fps=1`,
-    // `fps=${options.fps}`,
     '-q:v',
     '2',
     '-c:v',
