@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "youtube-dl-exec": "^2.1.11"
+    "youtube-dl-exec": "^2.2.3"
   }
 }
