@@ -16,10 +16,21 @@ const ytdl = require('youtube-dl-exec')
   createDirIfNotExists('./output')
   createDirIfNotExists(`./output/${ytId}`)
   const output = `./output/${ytId}/${ytId}.webm`
-  await ytdl(ytId, {
-    noPart: true,
-    output,
-  })
+  const download = (urlOrId) =>
+    ytdl(urlOrId, {
+      noPart: true,
+      output,
+    })
+  try {
+    await download(ytId)
+  } catch {
+    try {
+      await download(ytUrl)
+    } catch {
+      console.log('Failed to download video')
+      process.exit(1)
+    }
+  }
   convertVideoToFrames({
     videoName: output,
     outputDir: `./output/${ytId}/frames/`,
