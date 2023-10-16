@@ -1,6 +1,7 @@
-const { spawn } = require('child_process')
-const fs = require('fs')
+const { spawn } = require('node:child_process')
+const fs = require('node:fs')
 const ytdl = require('youtube-dl-exec')
+const ffmpegPath = require('ffmpeg-static')
 
 ;(async function init() {
   const ytUrl = process.argv[2]
@@ -16,7 +17,7 @@ const ytdl = require('youtube-dl-exec')
   createDirIfNotExists('./output')
   createDirIfNotExists(`./output/${ytId}`)
   const output = `./output/${ytId}/${ytId}.webm`
-  const download = (urlOrId) =>
+  const download = urlOrId =>
     ytdl(urlOrId, {
       noPart: true,
       output,
@@ -48,22 +49,18 @@ function convertVideoToFrames({ videoName, outputDir }) {
 
   createDirIfNotExists(options.outputDir)
 
+  // prettier-ignore
   let args = [
-    '-i',
-    options.videoName,
-    '-threads',
-    '4',
-    '-f',
-    'image2',
-    '-vf',
-    `setpts=1.0*PTS, fps=1`,
-    '-q:v',
-    '2',
-    '-c:v',
-    'mjpeg',
-    '-bt',
-    '20M',
+    '-i', options.videoName,
+    '-threads', 'auto',
+    '-f', 'image2',
+    '-vf', `setpts=1.0*PTS, fps=1`,
+    '-q:v', '1',
+    '-c:v', 'mjpeg',
+    '-bt', '20M',
+    '-an',
   ]
+  // prettier-enable
 
   if (options.startTime > 0) {
     args.push('-ss', options.startTime)
@@ -75,20 +72,20 @@ function convertVideoToFrames({ videoName, outputDir }) {
 
   args.push(`${options.outputDir}${options.imgFileName}%03d.jpg`)
 
-  let ffmpegVideoFrameProcess = spawn('ffmpeg', args)
+  let ffmpegVideoFrameProcess = spawn(ffmpegPath, args)
 
-  ffmpegVideoFrameProcess.stdout.on('data', (data) => {
+  ffmpegVideoFrameProcess.stdout.on('data', data => {
     console.log(data.toString())
   })
 
-  ffmpegVideoFrameProcess.stderr.on('data', (err) => {
+  ffmpegVideoFrameProcess.stderr.on('data', err => {
     console.log(err.toString())
   })
 
-  ffmpegVideoFrameProcess.on('error', (err) => {
+  ffmpegVideoFrameProcess.on('error', err => {
     console.log(`Failed to start child process: ${err.toString()}`)
   })
-  ffmpegVideoFrameProcess.on('close', (code) => {
+  ffmpegVideoFrameProcess.on('close', code => {
     console.log(`Child process exited with code ${code}`)
   })
 }
