@@ -1,17 +1,14 @@
 {
-  "name": "snap-yt",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/main.js",
-  "scripts": {
-    "start": "node src/main.js",
-    "test": "npm start https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  "name": "snap-youtube",
+  "module": "main.ts",
+  "devDependencies": {
+    "bun-types": "latest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "ffmpeg-static": "^5.2.0",
-    "youtube-dl-exec": "^2.4.15"
-  }
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "bun ."
+  },
+  "type": "module"
 }

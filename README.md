@@ -1,16 +1,15 @@
 # snap-youtube
 
 **snap-youtube** is a command-line tool that allows you to convert a YouTube
-video into a series of JPEG images, one image for each second of the video. It
-uses the `youtube-dl-exec` package to download the video and `FFmpeg` to convert
-the video into images.
+video into a series of JPEG images, one image for each second of the video.
 
 ## Prerequisites
 
 You will need to have the following software installed on your machine:
 
-- `Node` and `NPM`
+- `Bun`
 - `FFmpeg`
+- `yt-dlp`
 
 ## Installation
 
@@ -23,7 +22,7 @@ git clone https://github.com/amir-ziaei/snap-youtube
 2. Change into the directory and install the dependencies:
 
 ```sh
-cd snap-youtube && npm install
+cd snap-youtube && bun install
 ```
 
 ## Usage
@@ -47,7 +46,8 @@ the `output` directory.
 ## Note
 
 - This script uses `FFmpeg` to convert the video. Make sure you have `FFmpeg`
-  installed on your machine, if not, you can download it from the official
-  website.
+  installed on your machine.
+- This script uses `yt-dlp` to download the video. Make sure you have `yt-dlp`
+  installed on your machine.
 - The script might take some time to execute, especially if the video is long or
   the internet connection is slow.
