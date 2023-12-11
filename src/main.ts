@@ -1,22 +1,19 @@
 import fs from 'fs'
+import * as readline from 'node:readline/promises'
+import { stdin as input, stdout as output } from 'node:process'
 
-const localBinDir = './bin'
-const ffmpegInLocalBin = `${localBinDir}/ffmpeg`
-const ytDlpInLocalBin = `${localBinDir}/yt-dlp`
-const ffmpegPath = (await Bun.file(ffmpegInLocalBin).exists())
-  ? ffmpegInLocalBin
-  : 'ffmpeg'
-const ytDlpPath = (await Bun.file(ytDlpInLocalBin).exists())
-  ? ytDlpInLocalBin
-  : 'yt-dlp'
+const ffmpegPath = 'ffmpeg'
+const ytDlpPath = 'yt-dlp'
 
 ensureEnv()
-  .then(parseArgs)
+  .then(askArgs)
   .then(prepare)
   .then(download)
   .then(screenshotVideo)
   .then(deleteVideo)
-  .catch(logException)
+  .then(logSuccessAndExit)
+  .catch(logExceptionAndExit)
+
 //-------------------------------------------------------------------------*//
 function ensureEnv() {
   return new Promise<void>(resolve => {
@@ -38,22 +35,21 @@ function ensureEnv() {
   })
 }
 
-async function parseArgs() {
-  const { 2: maybeYtUrl } = Bun.argv
-  if (!maybeYtUrl) {
-    throw new Error('Please provide a YouTube URL')
-  }
+async function askArgs() {
+  const rl = readline.createInterface({ input, output })
+  const maybeYtUrl = await rl.question('The YouTube video URL: ')
   return getYoutubeVideoId(maybeYtUrl)
 }
 
 async function prepare(videoId: string) {
-  createDirIfNotExists('./output')
-  const outDir = `./output/${videoId}`
+  const outDir = `/output`
   createDirIfNotExists(outDir)
-  const videoOutPath = `./output/${videoId}/${videoId}.webm`
+  const videoOutDir = `${outDir}/${videoId}`
+  createDirIfNotExists(videoOutDir)
+  const videoOutPath = `${videoOutDir}/${videoId}.webm`
   return {
     videoId,
-    outDir,
+    videoOutDir,
     videoOutPath,
   }
 }
@@ -64,7 +60,7 @@ function download(props: Pipe) {
   return new Promise<typeof props>((resolve, reject) => {
     Bun.spawn(
       [
-        './bin/yt-dlp',
+        ytDlpPath,
         '-f',
         'bv',
         '--no-part',
@@ -90,14 +86,14 @@ function screenshotVideo(props: Pipe) {
   return new Promise<typeof props>((resolve, reject) => {
     Bun.spawn(
       [
-        './bin/ffmpeg',
+        ffmpegPath,
         '-i',
         props.videoOutPath,
         '-vf',
         'thumbnail,fps=1',
         '-q:v',
         '1',
-        `${props.outDir}/%d.png`,
+        `${props.videoOutDir}/%d.png`,
       ],
       {
         stdout: 'inherit',
@@ -113,8 +109,9 @@ function screenshotVideo(props: Pipe) {
   })
 }
 
-function deleteVideo({ videoOutPath }: Pipe) {
-  fs.unlinkSync(videoOutPath)
+function deleteVideo(args: Pipe) {
+  fs.unlinkSync(args.videoOutPath)
+  return args
 }
 
 function getYoutubeVideoId(ytUrl: string) {
@@ -133,7 +130,7 @@ function createDirIfNotExists(dir: string) {
   }
 }
 
-function logException(e: unknown) {
+function logExceptionAndExit(e: unknown) {
   const isDev = process.env.NODE_ENV !== 'production'
   if (isDev) {
     console.error(e)
@@ -142,4 +139,10 @@ function logException(e: unknown) {
   } else {
     console.error('Unexpected error')
   }
+  process.exit(1)
+}
+
+function logSuccessAndExit({ videoOutDir }: Pipe) {
+  console.log(`Success: screenshots saved to ${videoOutDir}`)
+  process.exit(0)
 }

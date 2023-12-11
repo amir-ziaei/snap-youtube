@@ -1,14 +1,12 @@
 {
   "name": "snap-youtube",
-  "module": "main.ts",
+  "module": "src/main.ts",
   "devDependencies": {
+    "@types/inquirer": "^9.0.7",
     "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  },
-  "scripts": {
-    "start": "bun ."
   },
   "type": "module"
 }
